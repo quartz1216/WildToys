@@ -141,13 +141,24 @@ public static class WindowManager
         if ((exStyle & Win32Interop.WS_EX_TOOLWINDOW) != 0)
             return false;
 
-        // Check if cloaked by DWM (e.g. background UWP apps).
+        // The inner UWP CoreWindow is never the Alt+Tab representative (the
+        // ApplicationFrameWindow is); closed Store apps leave it as a ghost.
+        var cls = new StringBuilder(256);
+        Win32Interop.GetClassName(hWnd, cls, cls.Capacity);
+        if (cls.ToString() == "Windows.UI.Core.CoreWindow")
+            return false;
+
+        // Check if cloaked by DWM (background/suspended apps, or other desktops).
         Win32Interop.DwmGetWindowAttribute(hWnd, Win32Interop.DWMWA_CLOAKED, out int cloaked, sizeof(int));
         if (cloaked != 0)
         {
-            // Allow shell-cloaked windows (typically on another virtual desktop)
-            // only when the user has opted to show all windows.
             if (!(ShowAllWindows && cloaked == Win32Interop.DWM_CLOAKED_SHELL))
+                return false;
+
+            // Only keep cloaked windows that live on a real virtual desktop.
+            // Closed UWP apps leave cloaked ghosts with no desktop assignment.
+            var deskId = WorkspaceManager.GetDesktopIdForWindow(hWnd);
+            if (deskId == null || deskId == Guid.Empty)
                 return false;
         }
 
