@@ -73,7 +73,7 @@ namespace WildToys.Modules.PowerSwitcher
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"WorkspaceManager failed to initialize: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"WorkspaceManager failed to initialize: {ex.Message}");
             }
         }
 
@@ -150,7 +150,7 @@ namespace WildToys.Modules.PowerSwitcher
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to get workspaces: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Failed to get workspaces: {ex.Message}");
             }
 
             return result;
