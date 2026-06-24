@@ -1,0 +1,19 @@
+## .NET / Visual Studio
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Oo]utput/
+.vs/
+*.user
+*.userosscache
+*.suo
+*.log
+
+## WinUI / MSIX
+AppPackages/
+BundleArtifacts/
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+Generated Files/
