@@ -1,44 +1,67 @@
-﻿using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using System;
+using H.NotifyIcon;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
+using Microsoft.UI.Xaml.Media.Imaging;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
-namespace WildToys_App;
+namespace WildToys;
 
 /// <summary>
-/// Provides application-specific behavior to supplement the default Application class.
+/// Tray-resident application. No window is shown on launch; the settings window
+/// is opened on demand from the tray icon.
 /// </summary>
 public partial class App : Application
 {
-    private Window? _window;
-    
-    /// <summary>
-    /// Initializes the singleton application object.  This is the first line of authored code
-    /// executed, and as such is the logical equivalent of main() or WinMain().
-    /// </summary>
+    private TaskbarIcon? _trayIcon;
+    private SettingsWindow? _settingsWindow;
+
     public App()
     {
         InitializeComponent();
     }
 
-    /// <summary>
-    /// Invoked when the application is launched.
-    /// </summary>
-    /// <param name="args">Details about the launch request and process.</param>
-    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        _window = new MainWindow();
-        _window.Activate();
+        _trayIcon = new TaskbarIcon
+        {
+            ToolTipText = "WildToys",
+            IconSource = new BitmapImage(new Uri("ms-appx:///Assets/AppIcon.ico")),
+            NoLeftClickDelay = true,
+            ContextMenuMode = ContextMenuMode.SecondWindow,
+            LeftClickCommand = new RelayCommand(ShowSettings),
+        };
+
+        var menu = new MenuFlyout();
+
+        var settingsItem = new MenuFlyoutItem { Text = "Settings..." };
+        settingsItem.Click += (_, _) => ShowSettings();
+        menu.Items.Add(settingsItem);
+
+        menu.Items.Add(new MenuFlyoutSeparator());
+
+        var exitItem = new MenuFlyoutItem { Text = "Exit" };
+        exitItem.Click += (_, _) => ExitApp();
+        menu.Items.Add(exitItem);
+
+        _trayIcon.ContextFlyout = menu;
+        _trayIcon.ForceCreate();
+    }
+
+    private void ShowSettings()
+    {
+        if (_settingsWindow is null)
+        {
+            _settingsWindow = new SettingsWindow();
+            _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        }
+
+        _settingsWindow.Activate();
+    }
+
+    private void ExitApp()
+    {
+        _trayIcon?.Dispose();
+        _trayIcon = null;
+        Exit();
     }
 }

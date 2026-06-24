@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="WildToys.Pages.MouseGesturePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel Margin="36,28,36,36" Spacing="8">
+        <TextBlock Text="MouseGesture" Style="{StaticResource TitleTextBlockStyle}" />
+        <TextBlock Opacity="0.7" TextWrapping="Wrap"
+                   Text="Per-process mouse-gesture to hotkey mapping." />
+    </StackPanel>
+</Page>
