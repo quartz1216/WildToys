@@ -15,13 +15,24 @@ public partial class App : Application
     private TaskbarIcon? _trayIcon;
     private SettingsWindow? _settingsWindow;
 
+    /// <summary>Strongly-typed accessor for the running application instance.</summary>
+    public static new App Current => (App)Application.Current;
+
+    /// <summary>The current, in-memory settings (loaded at startup).</summary>
+    public AppSettings Settings { get; private set; } = new();
+
     public App()
     {
         InitializeComponent();
     }
 
+    /// <summary>Persists the current settings to disk.</summary>
+    public void SaveSettings() => SettingsService.Save(Settings);
+
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        Settings = SettingsService.Load();
+
         _trayIcon = new TaskbarIcon
         {
             ToolTipText = "WildToys",
