@@ -3,9 +3,28 @@
     x:Class="WildToys.Pages.PowerSwitcherPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <StackPanel Margin="36,28,36,36" Spacing="8">
+    <StackPanel Margin="36,28,36,36" Spacing="20">
         <TextBlock Text="Power Switcher" Style="{StaticResource TitleTextBlockStyle}" />
-        <TextBlock Opacity="0.7" TextWrapping="Wrap"
-                   Text="Fast, minimalist Alt+Tab window switcher (formerly BWS)." />
+
+        <StackPanel Spacing="4">
+            <ToggleSwitch
+                x:Name="EnabledToggle"
+                Header="Enable Power Switcher"
+                Toggled="EnabledToggle_Toggled" />
+            <TextBlock
+                Opacity="0.6"
+                FontSize="12"
+                TextWrapping="Wrap"
+                Text="A fast, minimalist replacement for Alt+Tab that groups windows by virtual desktop and shows a live preview. Formerly &quot;BWS&quot;." />
+        </StackPanel>
+
+        <StackPanel Spacing="2">
+            <TextBlock Text="Shortcuts" FontWeight="SemiBold" Margin="0,0,0,4" />
+            <TextBlock Opacity="0.6" FontSize="12" Text="Alt+Tab — open and step forward (hold Alt)" />
+            <TextBlock Opacity="0.6" FontSize="12" Text="Arrow keys / hjkl — move selection" />
+            <TextBlock Opacity="0.6" FontSize="12" Text="Release Alt or Enter — switch to the selected window" />
+            <TextBlock Opacity="0.6" FontSize="12" Text="Q or middle-click — close the selected window" />
+            <TextBlock Opacity="0.6" FontSize="12" Text="Esc — cancel" />
+        </StackPanel>
     </StackPanel>
 </Page>

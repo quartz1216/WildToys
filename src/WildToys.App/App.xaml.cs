@@ -3,6 +3,7 @@ using H.NotifyIcon;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
+using WildToys.Modules.PowerSwitcher;
 
 namespace WildToys;
 
@@ -20,6 +21,9 @@ public partial class App : Application
 
     /// <summary>The current, in-memory settings (loaded at startup).</summary>
     public AppSettings Settings { get; private set; } = new();
+
+    /// <summary>The Power Switcher module (Alt+Tab replacement).</summary>
+    public PowerSwitcherModule PowerSwitcher { get; } = new();
 
     public App()
     {
@@ -56,6 +60,9 @@ public partial class App : Application
 
         _trayIcon.ContextFlyout = menu;
         _trayIcon.ForceCreate();
+
+        if (Settings.IsPowerSwitcherEnabled)
+            PowerSwitcher.Start();
     }
 
     private void ShowSettings()
@@ -71,6 +78,7 @@ public partial class App : Application
 
     private void ExitApp()
     {
+        PowerSwitcher.Dispose();
         _trayIcon?.Dispose();
         _trayIcon = null;
         Exit();
