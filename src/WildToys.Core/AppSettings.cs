@@ -24,9 +24,8 @@ public class AppSettings
 
     // Power Switcher: dim and/or blur the desktop behind the switcher while it's open.
     public bool PowerSwitcherDimEnabled { get; set; } = true;
-    public int PowerSwitcherDimAmount { get; set; } = 35; // percent, 0-100
+    public int PowerSwitcherDimAmount { get; set; } = 35; // darkness percent, 0-100 (tints blur too)
     public bool PowerSwitcherBlurEnabled { get; set; }
-    public int PowerSwitcherBlurAmount { get; set; } = 40; // blur tint percent, 0-100
 
     // LumaEdges: edge-zone hit thickness (px) and per-button zone -> hotkey maps.
     // Zone keys are the HotZone enum names ("Top", "TopLeft", ...). An empty/absent

@@ -38,19 +38,11 @@
                 x:Name="BlurToggle"
                 Header="Blur the background"
                 Toggled="BlurToggle_Toggled" />
-            <TextBlock x:Name="BlurAmountLabel" Opacity="0.8" FontSize="12" Text="Blur tint: 40%" />
-            <Slider
-                x:Name="BlurSlider"
-                Minimum="0"
-                Maximum="100"
-                StepFrequency="5"
-                Value="40"
-                ValueChanged="BlurSlider_ValueChanged" />
             <TextBlock
                 Opacity="0.6"
                 FontSize="12"
                 TextWrapping="Wrap"
-                Text="Acrylic blur of the desktop behind the switcher. The slider sets how dark the blur tint is. Blur takes precedence over a plain dim." />
+                Text="Acrylic blur of the desktop behind the switcher. Combine it with the dim above — the darkness slider also tints the blur." />
         </StackPanel>
 
         <StackPanel Spacing="2">

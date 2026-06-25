@@ -501,15 +501,19 @@ public sealed partial class SwitcherWindow : Window
     private void ShowBackdrop()
     {
         var s = SettingsService.Load();
+        bool dim = s.PowerSwitcherDimEnabled;
+        bool blur = s.PowerSwitcherBlurEnabled;
 
-        // Blur (acrylic) takes precedence over a flat dim since they use different
-        // window mechanisms and can't be stacked.
-        if (s.PowerSwitcherBlurEnabled)
-            _backdrop.Show(blur: true, alpha: Math.Clamp(s.PowerSwitcherBlurAmount, 0, 100) * 255 / 100);
-        else if (s.PowerSwitcherDimEnabled)
-            _backdrop.Show(blur: false, alpha: Math.Clamp(s.PowerSwitcherDimAmount, 0, 100) * 255 / 100);
-        else
+        if (!dim && !blur)
+        {
             _backdrop.Hide();
+            return;
+        }
+
+        // The darkness slider drives the tint in both modes, so dim and blur stack:
+        // blur on -> acrylic blur tinted by the dim amount; blur off -> a flat dim.
+        int tint = dim ? Math.Clamp(s.PowerSwitcherDimAmount, 0, 100) * 255 / 100 : 0;
+        _backdrop.Show(blur: blur, alpha: tint);
     }
 
     private void Cell_PointerReleased(object sender, PointerRoutedEventArgs e)

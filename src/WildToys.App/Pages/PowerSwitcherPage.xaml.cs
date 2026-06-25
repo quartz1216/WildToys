@@ -24,10 +24,7 @@ public sealed partial class PowerSwitcherPage : Page
         DimSlider.Value = s.PowerSwitcherDimAmount;
         DimAmountLabel.Text = $"Darkness: {s.PowerSwitcherDimAmount}%";
         BlurToggle.IsOn = s.PowerSwitcherBlurEnabled;
-        BlurSlider.Value = s.PowerSwitcherBlurAmount;
-        BlurAmountLabel.Text = $"Blur tint: {s.PowerSwitcherBlurAmount}%";
         UpdateDimEnabled();
-        UpdateBlurEnabled();
 
         _loading = false;
     }
@@ -72,19 +69,6 @@ public sealed partial class PowerSwitcherPage : Page
         if (_loading) return;
 
         App.Current.Settings.PowerSwitcherBlurEnabled = BlurToggle.IsOn;
-        UpdateBlurEnabled();
-        App.Current.SaveSettings();
-    }
-
-    private void BlurSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
-    {
-        var pct = (int)e.NewValue;
-        if (BlurAmountLabel is not null)
-            BlurAmountLabel.Text = $"Blur tint: {pct}%";
-
-        if (_loading) return;
-
-        App.Current.Settings.PowerSwitcherBlurAmount = pct;
         App.Current.SaveSettings();
     }
 
@@ -92,11 +76,5 @@ public sealed partial class PowerSwitcherPage : Page
     {
         if (DimSlider is not null)
             DimSlider.IsEnabled = DimToggle.IsOn;
-    }
-
-    private void UpdateBlurEnabled()
-    {
-        if (BlurSlider is not null)
-            BlurSlider.IsEnabled = BlurToggle.IsOn;
     }
 }
