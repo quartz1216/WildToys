@@ -42,6 +42,17 @@
                 <NavigationViewItem Content="IM Indicator" Tag="ImIndicatorPage" />
             </NavigationView.MenuItems>
 
+            <NavigationView.PaneFooter>
+                <HyperlinkButton
+                    NavigateUri="https://github.com/quartz1216/WildToys"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Margin="4,0,4,4"
+                    Padding="12,8">
+                    <TextBlock Text="Give feedback" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                </HyperlinkButton>
+            </NavigationView.PaneFooter>
+
             <Frame x:Name="ContentFrame" />
         </NavigationView>
     </Grid>

@@ -1,5 +1,5 @@
 #define MyAppName "WildToys"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "2.1.0"
 #define MyAppPublisher "quartz1216"
 #define MyAppURL "https://github.com/quartz1216/WildToys"
 #define MyAppExeName "WildToys.exe"
