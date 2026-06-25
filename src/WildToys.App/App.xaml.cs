@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using WildToys.Modules.ImIndicator;
 using WildToys.Modules.LumaEdges;
+using WildToys.Modules.MouseGesture;
 using WildToys.Modules.MouseWarp;
 using WildToys.Modules.PowerSwitcher;
 
@@ -39,6 +40,9 @@ public partial class App : Application
 
     /// <summary>The IM Indicator module (input-language badge near the caret).</summary>
     public ImIndicatorModule ImIndicator { get; } = new();
+
+    /// <summary>The MouseGesture module (right/middle-button drag gestures).</summary>
+    public MouseGestureModule MouseGesture { get; } = new();
 
     public App()
     {
@@ -122,6 +126,9 @@ public partial class App : Application
 
         if (Settings.IsImIndicatorEnabled)
             ImIndicator.Start();
+
+        if (Settings.IsMouseGestureEnabled)
+            MouseGesture.Start();
     }
 
     private void ShowSettings()
@@ -141,6 +148,7 @@ public partial class App : Application
         LumaEdges.Dispose();
         MouseWarp.Dispose();
         ImIndicator.Dispose();
+        MouseGesture.Dispose();
         _trayIcon?.Dispose();
         _trayIcon = null;
         Exit();

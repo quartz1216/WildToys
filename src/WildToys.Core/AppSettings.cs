@@ -18,6 +18,9 @@ public class AppSettings
     // IM Indicator: how long (ms) the input-language badge stays on screen.
     public int ImIndicatorDurationMs { get; set; } = 1500;
 
+    // MouseGesture: per-entry gesture bindings (gesture stroke, button, action, process).
+    public List<GestureEntry> MouseGestures { get; set; } = new();
+
     // MouseWarp: optionally animate the cursor to the window center (and how long).
     public bool MouseWarpAnimationEnabled { get; set; } = true;
     public int MouseWarpAnimationDurationMs { get; set; } = 180;
