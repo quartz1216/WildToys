@@ -6,6 +6,7 @@ using H.NotifyIcon;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
+using WildToys.Modules.LumaEdges;
 using WildToys.Modules.PowerSwitcher;
 
 namespace WildToys;
@@ -27,6 +28,9 @@ public partial class App : Application
 
     /// <summary>The Power Switcher module (Alt+Tab replacement).</summary>
     public PowerSwitcherModule PowerSwitcher { get; } = new();
+
+    /// <summary>The LumaEdges module (screen-edge click hotkeys).</summary>
+    public LumaEdgesModule LumaEdges { get; } = new();
 
     public App()
     {
@@ -101,6 +105,9 @@ public partial class App : Application
 
         if (Settings.IsPowerSwitcherEnabled)
             PowerSwitcher.Start();
+
+        if (Settings.IsLumaEdgesEnabled)
+            LumaEdges.Start();
     }
 
     private void ShowSettings()
@@ -117,6 +124,7 @@ public partial class App : Application
     private void ExitApp()
     {
         PowerSwitcher.Dispose();
+        LumaEdges.Dispose();
         _trayIcon?.Dispose();
         _trayIcon = null;
         Exit();

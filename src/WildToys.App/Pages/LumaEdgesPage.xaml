@@ -3,9 +3,225 @@
     x:Class="WildToys.Pages.LumaEdgesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <StackPanel Margin="36,28,36,36" Spacing="8">
-        <TextBlock Text="LumaEdges" Style="{StaticResource TitleTextBlockStyle}" />
-        <TextBlock Opacity="0.7" TextWrapping="Wrap"
-                   Text="Screen-edge hotkey zones triggered by mouse clicks." />
-    </StackPanel>
+
+    <Page.Resources>
+        <!-- One labeled hotkey row inside a zone grid. -->
+        <Style x:Key="ZoneLabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="Opacity" Value="0.8" />
+        </Style>
+        <Style x:Key="ZoneBoxStyle" TargetType="TextBox">
+            <Setter Property="PlaceholderText" Value="e.g. Ctrl+Alt+Up" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer>
+        <StackPanel Margin="36,28,36,36" Spacing="20" MaxWidth="640" HorizontalAlignment="Left">
+            <TextBlock Text="LumaEdges" Style="{StaticResource TitleTextBlockStyle}" />
+
+            <StackPanel Spacing="4">
+                <ToggleSwitch
+                    x:Name="EnabledToggle"
+                    Header="Enable LumaEdges"
+                    Toggled="EnabledToggle_Toggled" />
+                <TextBlock
+                    Opacity="0.6"
+                    FontSize="12"
+                    TextWrapping="Wrap"
+                    Text="Click a screen edge or corner with the left, right, or middle mouse button to fire a hotkey. Leave a zone empty to let the click pass through normally." />
+            </StackPanel>
+
+            <!-- Edge thickness -->
+            <StackPanel Spacing="4">
+                <TextBlock x:Name="ThicknessLabel" Text="Edge thickness: 2 px" FontWeight="SemiBold" />
+                <Slider
+                    x:Name="ThicknessSlider"
+                    Minimum="1"
+                    Maximum="20"
+                    StepFrequency="1"
+                    Value="2"
+                    ValueChanged="ThicknessSlider_ValueChanged" />
+                <TextBlock
+                    Opacity="0.6"
+                    FontSize="12"
+                    TextWrapping="Wrap"
+                    Text="How thick (in pixels) the clickable edge band is. Corners get a slightly larger hit box." />
+            </StackPanel>
+
+            <!-- Hover (hot corners / edges, no mouse button) -->
+            <StackPanel Spacing="4">
+                <ToggleSwitch
+                    x:Name="HoverToggle"
+                    Header="Hover triggers (hot corners &amp; edges)"
+                    Toggled="HoverToggle_Toggled" />
+                <TextBlock
+                    Opacity="0.6"
+                    FontSize="12"
+                    TextWrapping="Wrap"
+                    Text="Fire a hotkey just by moving the cursor into a zone — no click needed. Each entry fires once; leave and re-enter to fire again." />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock x:Name="HoverDelayLabel" Text="Activation delay: 200 ms" FontWeight="SemiBold" />
+                <Slider
+                    x:Name="HoverDelaySlider"
+                    Minimum="0"
+                    Maximum="1000"
+                    StepFrequency="50"
+                    Value="200"
+                    ValueChanged="HoverDelaySlider_ValueChanged" />
+                <TextBlock
+                    Opacity="0.6"
+                    FontSize="12"
+                    TextWrapping="Wrap"
+                    Text="How long the cursor must dwell in the zone before firing. Higher values avoid accidental triggers when just passing through a corner." />
+            </StackPanel>
+
+            <Expander x:Name="HoverExpander" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                <Expander.Header>
+                    <TextBlock Text="Hover zones" FontWeight="SemiBold" />
+                </Expander.Header>
+                <Grid ColumnSpacing="12" Padding="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Top" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtHoverTop" Grid.Row="0" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Bottom" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtHoverBottom" Grid.Row="1" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtHoverLeft" Grid.Row="2" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtHoverRight" Grid.Row="3" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Top-left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtHoverTopLeft" Grid.Row="4" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Top-right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtHoverTopRight" Grid.Row="5" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Bottom-left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtHoverBottomLeft" Grid.Row="6" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Bottom-right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtHoverBottomRight" Grid.Row="7" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                </Grid>
+            </Expander>
+
+            <!-- Right button -->
+            <Expander x:Name="RightExpander" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="True">
+                <Expander.Header>
+                    <TextBlock Text="Right button" FontWeight="SemiBold" />
+                </Expander.Header>
+                <Grid ColumnSpacing="12" Padding="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Top" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtRightTop" Grid.Row="0" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Bottom" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtRightBottom" Grid.Row="1" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtRightLeft" Grid.Row="2" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtRightRight" Grid.Row="3" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Top-left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtRightTopLeft" Grid.Row="4" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Top-right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtRightTopRight" Grid.Row="5" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Bottom-left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtRightBottomLeft" Grid.Row="6" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Bottom-right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtRightBottomRight" Grid.Row="7" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                </Grid>
+            </Expander>
+
+            <!-- Left button -->
+            <Expander x:Name="LeftExpander" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                <Expander.Header>
+                    <TextBlock Text="Left button" FontWeight="SemiBold" />
+                </Expander.Header>
+                <Grid ColumnSpacing="12" Padding="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Top" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtLeftTop" Grid.Row="0" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Bottom" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtLeftBottom" Grid.Row="1" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtLeftLeft" Grid.Row="2" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtLeftRight" Grid.Row="3" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Top-left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtLeftTopLeft" Grid.Row="4" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Top-right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtLeftTopRight" Grid.Row="5" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Bottom-left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtLeftBottomLeft" Grid.Row="6" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Bottom-right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtLeftBottomRight" Grid.Row="7" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                </Grid>
+            </Expander>
+
+            <!-- Middle button -->
+            <Expander x:Name="MiddleExpander" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                <Expander.Header>
+                    <TextBlock Text="Middle button" FontWeight="SemiBold" />
+                </Expander.Header>
+                <Grid ColumnSpacing="12" Padding="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Top" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtMiddleTop" Grid.Row="0" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Bottom" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtMiddleBottom" Grid.Row="1" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtMiddleLeft" Grid.Row="2" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtMiddleRight" Grid.Row="3" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Top-left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtMiddleTopLeft" Grid.Row="4" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Top-right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtMiddleTopRight" Grid.Row="5" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Bottom-left" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtMiddleBottomLeft" Grid.Row="6" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Bottom-right" Style="{StaticResource ZoneLabelStyle}" />
+                    <TextBox x:Name="TxtMiddleBottomRight" Grid.Row="7" Grid.Column="1" Style="{StaticResource ZoneBoxStyle}" LostFocus="Zone_LostFocus" />
+                </Grid>
+            </Expander>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

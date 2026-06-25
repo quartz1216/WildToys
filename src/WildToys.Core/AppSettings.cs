@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace WildToys;
 
 /// <summary>Persisted application + per-module settings.</summary>
@@ -11,4 +13,31 @@ public class AppSettings
     public bool IsPowerSwitcherEnabled { get; set; } = true;
     public bool IsLumaEdgesEnabled { get; set; } = true;
     public bool IsMouseGestureEnabled { get; set; } = true;
+
+    // LumaEdges: edge-zone hit thickness (px) and per-button zone -> hotkey maps.
+    // Zone keys are the HotZone enum names ("Top", "TopLeft", ...). An empty/absent
+    // value means the click passes through normally.
+    public int LumaEdgesThickness { get; set; } = 2;
+
+    public Dictionary<string, string> LumaEdgesLeftZones { get; set; } = new();
+
+    public Dictionary<string, string> LumaEdgesRightZones { get; set; } = new()
+    {
+        { "Top", "Ctrl+Alt+Up" },
+        { "Bottom", "Ctrl+Alt+Down" },
+        { "Left", "Alt+Left" },
+        { "Right", "Alt+Right" },
+        { "TopLeft", "Win+Tab" },
+        { "TopRight", "Alt+F4" },
+        { "BottomLeft", "Ctrl+Esc" },
+        { "BottomRight", "Win+D" }
+    };
+
+    public Dictionary<string, string> LumaEdgesMiddleZones { get; set; } = new();
+
+    // LumaEdges hover (hot-corner) triggers: fire a hotkey just by moving the cursor
+    // into a zone, no click. Edge-triggered with a dwell delay (ms) before firing.
+    public bool LumaEdgesHoverEnabled { get; set; } = true;
+    public int LumaEdgesHoverDelayMs { get; set; } = 200;
+    public Dictionary<string, string> LumaEdgesHoverZones { get; set; } = new();
 }
