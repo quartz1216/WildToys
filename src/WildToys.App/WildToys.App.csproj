@@ -58,12 +58,11 @@
   -->
   <ItemGroup>
     <PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
+    <!-- SystemEvents.DisplaySettingsChanged (LumaEdges) without pulling in WinForms/WPF. -->
+    <PackageReference Include="Microsoft.Win32.SystemEvents" Version="10.0.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="0.3.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WildToys.Core\WildToys.Core.csproj" />
   </ItemGroup>
 
   <!--

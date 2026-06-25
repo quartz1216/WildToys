@@ -1,23 +1,14 @@
-using System.Drawing;
-
 namespace WildToys.Modules.LumaEdges;
 
 public static class HotZoneDetector
 {
-    public static HotZone Detect(Point position, Rectangle bounds, int thickness)
+    public static HotZone Detect(int x, int y, int left, int top, int right, int bottom, int thickness)
     {
-        if (thickness <= 0 || !bounds.Contains(position))
+        // Inclusive of left/top, exclusive of right/bottom (a screen's pixel range).
+        if (thickness <= 0 || x < left || x >= right || y < top || y >= bottom)
         {
             return HotZone.None;
         }
-
-        var x = position.X;
-        var y = position.Y;
-
-        var left = bounds.Left;
-        var top = bounds.Top;
-        var right = bounds.Right;
-        var bottom = bounds.Bottom;
 
         // To make corners actually clickable when thickness is very small (like 2px),
         // we internally give corners a slightly more forgiving hit box (e.g., minimum 5px)

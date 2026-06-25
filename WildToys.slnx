@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/WildToys.App/WildToys.App.csproj" />
-    <Project Path="src/WildToys.Core/WildToys.Core.csproj" />
   </Folder>
 </Solution>

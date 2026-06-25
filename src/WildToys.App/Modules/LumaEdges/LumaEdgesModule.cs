@@ -1,7 +1,5 @@
-using System.Drawing;
-using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using Microsoft.Win32;
 
 namespace WildToys.Modules.LumaEdges;
@@ -40,7 +38,7 @@ public sealed class LumaEdgesModule : IDisposable
     // hits the disk or re-enumerates monitors. Refreshed on Start, on ReloadSettings
     // (called by the settings page after a save), and on display changes.
     private AppSettings _settings = new();
-    private Rectangle[] _screens = Array.Empty<Rectangle>();
+    private RECT[] _screens = Array.Empty<RECT>();
 
     private static readonly object CooldownLock = new();
     private static readonly TimeSpan Cooldown = TimeSpan.FromMilliseconds(300);
@@ -104,7 +102,14 @@ public sealed class LumaEdgesModule : IDisposable
 
     private void OnDisplaySettingsChanged(object? sender, EventArgs e) => RefreshScreens();
 
-    private void RefreshScreens() => _screens = Screen.AllScreens.Select(s => s.Bounds).ToArray();
+    private void RefreshScreens()
+    {
+        var rects = new List<RECT>();
+        EnumDisplayMonitors(nint.Zero, nint.Zero,
+            (nint _, nint _, ref RECT r, nint _) => { rects.Add(r); return true; },
+            nint.Zero);
+        _screens = rects.ToArray();
+    }
 
     private nint MouseHookCallback(int nCode, nint wParam, nint lParam)
     {
@@ -136,7 +141,7 @@ public sealed class LumaEdgesModule : IDisposable
             }
             else if (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN)
             {
-                var detectedZone = DetectZone(Cursor.Position, _settings.LumaEdgesThickness);
+                var detectedZone = DetectZone(GetCursor(), _settings.LumaEdgesThickness);
                 if (detectedZone != HotZone.None)
                 {
                     string? hotkey = null;
@@ -171,7 +176,7 @@ public sealed class LumaEdgesModule : IDisposable
             return;
         }
 
-        var zone = DetectZone(Cursor.Position, _settings.LumaEdgesThickness);
+        var zone = DetectZone(GetCursor(), _settings.LumaEdgesThickness);
         if (zone == _currentHoverZone)
             return; // still in the same zone (or still outside) — nothing to do
 
@@ -199,22 +204,28 @@ public sealed class LumaEdgesModule : IDisposable
     private void OnHoverDwellElapsed(HotZone targetZone, string hotkey)
     {
         if (!_isRunning) return;
-        if (DetectZone(Cursor.Position, _settings.LumaEdgesThickness) != targetZone)
+        if (DetectZone(GetCursor(), _settings.LumaEdgesThickness) != targetZone)
             return;
         if (!TryStartCooldown())
             return;
         HotkeySender.SendDetailed(hotkey);
     }
 
-    private HotZone DetectZone(Point position, int thickness)
+    private HotZone DetectZone(POINT position, int thickness)
     {
-        foreach (var bounds in _screens)
+        foreach (var b in _screens)
         {
-            var zone = HotZoneDetector.Detect(position, bounds, thickness);
+            var zone = HotZoneDetector.Detect(position.x, position.y, b.left, b.top, b.right, b.bottom, thickness);
             if (zone != HotZone.None)
                 return zone;
         }
         return HotZone.None;
+    }
+
+    private static POINT GetCursor()
+    {
+        GetCursorPos(out var p);
+        return p;
     }
 
     private static void SendHotkeyAsync(string hotkey)
@@ -255,4 +266,29 @@ public sealed class LumaEdgesModule : IDisposable
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern nint GetModuleHandle(string lpModuleName);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out POINT lpPoint);
+
+    private delegate bool MonitorEnumProc(nint hMonitor, nint hdc, ref RECT lprcMonitor, nint dwData);
+
+    [DllImport("user32.dll")]
+    private static extern bool EnumDisplayMonitors(nint hdc, nint lprcClip, MonitorEnumProc lpfnEnum, nint dwData);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int x;
+        public int y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int left;
+        public int top;
+        public int right;
+        public int bottom;
+    }
 }
