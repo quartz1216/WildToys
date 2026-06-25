@@ -18,6 +18,41 @@
                 Text="A fast, minimalist replacement for Alt+Tab that groups windows by virtual desktop and shows a live preview. Formerly &quot;BWS&quot;." />
         </StackPanel>
 
+        <StackPanel Spacing="4">
+            <ToggleSwitch
+                x:Name="DimToggle"
+                Header="Dim the background"
+                Toggled="DimToggle_Toggled" />
+            <TextBlock x:Name="DimAmountLabel" Opacity="0.8" FontSize="12" Text="Darkness: 35%" />
+            <Slider
+                x:Name="DimSlider"
+                Minimum="0"
+                Maximum="100"
+                StepFrequency="5"
+                Value="35"
+                ValueChanged="DimSlider_ValueChanged" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <ToggleSwitch
+                x:Name="BlurToggle"
+                Header="Blur the background"
+                Toggled="BlurToggle_Toggled" />
+            <TextBlock x:Name="BlurAmountLabel" Opacity="0.8" FontSize="12" Text="Blur tint: 40%" />
+            <Slider
+                x:Name="BlurSlider"
+                Minimum="0"
+                Maximum="100"
+                StepFrequency="5"
+                Value="40"
+                ValueChanged="BlurSlider_ValueChanged" />
+            <TextBlock
+                Opacity="0.6"
+                FontSize="12"
+                TextWrapping="Wrap"
+                Text="Acrylic blur of the desktop behind the switcher. The slider sets how dark the blur tint is. Blur takes precedence over a plain dim." />
+        </StackPanel>
+
         <StackPanel Spacing="2">
             <TextBlock Text="Shortcuts" FontWeight="SemiBold" Margin="0,0,0,4" />
             <TextBlock Opacity="0.6" FontSize="12" Text="Alt+Tab — open and step forward (hold Alt)" />

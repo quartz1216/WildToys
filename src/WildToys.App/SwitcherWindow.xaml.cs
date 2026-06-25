@@ -28,6 +28,7 @@ public sealed partial class SwitcherWindow : Window
     private static readonly SolidColorBrush SelectedBrush = new(Color.FromArgb(0xFF, 0x31, 0x31, 0x31));
 
     private readonly WindowIconService _iconService = new();
+    private readonly SwitcherBackdrop _backdrop = new();
     private readonly List<WorkspaceRow> _grid = new();
     private readonly List<List<Border>> _cells = new();
 
@@ -92,12 +93,15 @@ public sealed partial class SwitcherWindow : Window
         _selectedRow = 0;
         _selectedCol = 0;
 
+        ShowBackdrop();
+
         // Show centered with a provisional size, then shrink to fit the content
         // (the window is never full-screen, so it doesn't cover the desktop).
         var work = DisplayArea.Primary.WorkArea;
         _appWindow.MoveAndResize(new RectInt32(work.X + (work.Width - 760) / 2, work.Y + (work.Height - 640) / 2, 760, 640));
         _appWindow.Show(false);
         ApplyWindowChrome();
+        _backdrop.PlaceBehind(_hwnd);
         _visible = true;
 
         DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
@@ -491,6 +495,21 @@ public sealed partial class SwitcherWindow : Window
         _sticky = false;
 
         _appWindow.Hide();
+        _backdrop.Hide();
+    }
+
+    private void ShowBackdrop()
+    {
+        var s = SettingsService.Load();
+
+        // Blur (acrylic) takes precedence over a flat dim since they use different
+        // window mechanisms and can't be stacked.
+        if (s.PowerSwitcherBlurEnabled)
+            _backdrop.Show(blur: true, alpha: Math.Clamp(s.PowerSwitcherBlurAmount, 0, 100) * 255 / 100);
+        else if (s.PowerSwitcherDimEnabled)
+            _backdrop.Show(blur: false, alpha: Math.Clamp(s.PowerSwitcherDimAmount, 0, 100) * 255 / 100);
+        else
+            _backdrop.Hide();
     }
 
     private void Cell_PointerReleased(object sender, PointerRoutedEventArgs e)
