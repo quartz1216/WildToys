@@ -24,6 +24,9 @@ public sealed partial class PowerSwitcherPage : Page
         DimSlider.Value = s.PowerSwitcherDimAmount;
         DimAmountLabel.Text = $"Darkness: {s.PowerSwitcherDimAmount}%";
         BlurToggle.IsOn = s.PowerSwitcherBlurEnabled;
+        DelaySlider.Value = s.PowerSwitcherShowDelayMs;
+        DelayLabel.Text = $"Show delay: {s.PowerSwitcherShowDelayMs} ms";
+        FadeToggle.IsOn = s.PowerSwitcherFadeIn;
         UpdateDimEnabled();
 
         _loading = false;
@@ -69,6 +72,26 @@ public sealed partial class PowerSwitcherPage : Page
         if (_loading) return;
 
         App.Current.Settings.PowerSwitcherBlurEnabled = BlurToggle.IsOn;
+        App.Current.SaveSettings();
+    }
+
+    private void DelaySlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+        var ms = (int)e.NewValue;
+        if (DelayLabel is not null)
+            DelayLabel.Text = $"Show delay: {ms} ms";
+
+        if (_loading) return;
+
+        App.Current.Settings.PowerSwitcherShowDelayMs = ms;
+        App.Current.SaveSettings();
+    }
+
+    private void FadeToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+
+        App.Current.Settings.PowerSwitcherFadeIn = FadeToggle.IsOn;
         App.Current.SaveSettings();
     }
 

@@ -60,6 +60,17 @@ internal sealed class SwitcherBackdrop
         InvalidateRect(_hwnd, IntPtr.Zero, true);
     }
 
+    /// <summary>Re-apply just the tint/dim alpha (for fade-in), keeping the current mode.</summary>
+    public void SetAlpha(bool blur, int alpha)
+    {
+        if (_hwnd == IntPtr.Zero) return;
+        alpha = Math.Clamp(alpha, 0, 255);
+        if (blur)
+            ApplyAccent(ACCENT_ENABLE_ACRYLICBLURBEHIND, alpha);
+        else
+            SetLayeredWindowAttributes(_hwnd, 0, (byte)alpha, LWA_ALPHA);
+    }
+
     public void Hide()
     {
         if (_hwnd != IntPtr.Zero)

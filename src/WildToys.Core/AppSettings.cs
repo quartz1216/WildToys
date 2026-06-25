@@ -27,6 +27,11 @@ public class AppSettings
     public int PowerSwitcherDimAmount { get; set; } = 35; // darkness percent, 0-100 (tints blur too)
     public bool PowerSwitcherBlurEnabled { get; set; }
 
+    // Delay (ms) before the switcher window appears; a quick Alt+Tab tap switches
+    // without flashing the UI. The fade-in animates the backdrop + switcher when shown.
+    public int PowerSwitcherShowDelayMs { get; set; } = 50;
+    public bool PowerSwitcherFadeIn { get; set; } = true;
+
     // LumaEdges: edge-zone hit thickness (px) and per-button zone -> hotkey maps.
     // Zone keys are the HotZone enum names ("Top", "TopLeft", ...). An empty/absent
     // value means the click passes through normally.

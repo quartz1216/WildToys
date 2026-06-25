@@ -45,6 +45,34 @@
                 Text="Acrylic blur of the desktop behind the switcher. Combine it with the dim above — the darkness slider also tints the blur." />
         </StackPanel>
 
+        <StackPanel Spacing="4">
+            <TextBlock x:Name="DelayLabel" Text="Show delay: 50 ms" FontWeight="SemiBold" />
+            <Slider
+                x:Name="DelaySlider"
+                Minimum="0"
+                Maximum="400"
+                StepFrequency="10"
+                Value="50"
+                ValueChanged="DelaySlider_ValueChanged" />
+            <TextBlock
+                Opacity="0.6"
+                FontSize="12"
+                TextWrapping="Wrap"
+                Text="How long to wait before the switcher appears. A quick Alt+Tab tap switches to the previous window without showing the UI." />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <ToggleSwitch
+                x:Name="FadeToggle"
+                Header="Fade in the background"
+                Toggled="FadeToggle_Toggled" />
+            <TextBlock
+                Opacity="0.6"
+                FontSize="12"
+                TextWrapping="Wrap"
+                Text="Animate the dim/blur backdrop and the switcher fading in when it appears." />
+        </StackPanel>
+
         <StackPanel Spacing="2">
             <TextBlock Text="Shortcuts" FontWeight="SemiBold" Margin="0,0,0,4" />
             <TextBlock Opacity="0.6" FontSize="12" Text="Alt+Tab — open and step forward (hold Alt)" />

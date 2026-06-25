@@ -38,8 +38,17 @@ public sealed partial class SwitcherWindow : Window
     private int _selectedRow;
     private int _selectedCol;
     private bool _sticky;
-    private bool _visible;
+    private bool _active;   // session is live (grid built) — may precede the window being shown
+    private bool _visible;  // the switcher window is actually on screen
     private IntPtr _thumbnailId = IntPtr.Zero;
+
+    private DispatcherQueueTimer? _showTimer;
+    private DispatcherQueueTimer? _fadeTimer;
+    private DateTime _fadeStart;
+    private bool _backdropShown;
+    private bool _fadeBlur;
+    private int _fadeTargetAlpha;
+    private const int FadeDurationMs = 140;
 
     public bool IsSwitcherActive => _grid.Count > 0;
 
@@ -82,18 +91,51 @@ public sealed partial class SwitcherWindow : Window
 
     private void ShowSwitcherCore(bool sticky)
     {
-        if (_visible) return;
+        if (_active) return;
+        _active = true;
         _sticky = sticky;
 
         BuildGrid();
-        if (_grid.Count == 0) return;
+        if (_grid.Count == 0)
+        {
+            _active = false;
+            return;
+        }
 
         RebuildVisuals();
 
         _selectedRow = 0;
         _selectedCol = 0;
 
-        ShowBackdrop();
+        // The grid is now live (IsSwitcherActive), so Tab-stepping and a quick
+        // Alt-release commit work immediately. The window itself appears only after
+        // a short delay, so a fast Alt+Tab tap switches without flashing the UI.
+        int delay = Math.Max(0, SettingsService.Load().PowerSwitcherShowDelayMs);
+        if (delay <= 0)
+        {
+            RevealNow();
+            return;
+        }
+
+        _showTimer = DispatcherQueue.CreateTimer();
+        _showTimer.IsRepeating = false;
+        _showTimer.Interval = TimeSpan.FromMilliseconds(delay);
+        _showTimer.Tick += (_, _) =>
+        {
+            _showTimer?.Stop();
+            _showTimer = null;
+            RevealNow();
+        };
+        _showTimer.Start();
+    }
+
+    private void RevealNow()
+    {
+        if (!_active || _visible) return;
+
+        bool fade = SettingsService.Load().PowerSwitcherFadeIn;
+
+        ShowBackdrop(fade);
 
         // Show centered with a provisional size, then shrink to fit the content
         // (the window is never full-screen, so it doesn't cover the desktop).
@@ -103,6 +145,8 @@ public sealed partial class SwitcherWindow : Window
         ApplyWindowChrome();
         _backdrop.PlaceBehind(_hwnd);
         _visible = true;
+
+        RootGrid.Opacity = fade ? 0 : 1;
 
         DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
         {
@@ -114,8 +158,34 @@ public sealed partial class SwitcherWindow : Window
             {
                 RootGrid.UpdateLayout();
                 UpdateSelectionUI();
+                if (fade) StartFade();
             });
         });
+    }
+
+    private void StartFade()
+    {
+        _fadeTimer?.Stop();
+        _fadeStart = DateTime.UtcNow;
+        _fadeTimer = DispatcherQueue.CreateTimer();
+        _fadeTimer.IsRepeating = true;
+        _fadeTimer.Interval = TimeSpan.FromMilliseconds(15);
+        _fadeTimer.Tick += (_, _) =>
+        {
+            double t = (DateTime.UtcNow - _fadeStart).TotalMilliseconds / FadeDurationMs;
+            if (t >= 1.0)
+            {
+                RootGrid.Opacity = 1;
+                if (_backdropShown) _backdrop.SetAlpha(_fadeBlur, _fadeTargetAlpha);
+                _fadeTimer?.Stop();
+                _fadeTimer = null;
+                return;
+            }
+
+            RootGrid.Opacity = t;
+            if (_backdropShown) _backdrop.SetAlpha(_fadeBlur, (int)(_fadeTargetAlpha * t));
+        };
+        _fadeTimer.Start();
     }
 
     [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
@@ -485,8 +555,13 @@ public sealed partial class SwitcherWindow : Window
 
     public void HideSwitcher()
     {
-        if (!_visible) return;
-        _visible = false;
+        if (!_active) return;
+        _active = false;
+
+        _showTimer?.Stop();
+        _showTimer = null;
+        _fadeTimer?.Stop();
+        _fadeTimer = null;
 
         UnregisterThumbnail();
         RowsPanel.Children.Clear();
@@ -494,11 +569,18 @@ public sealed partial class SwitcherWindow : Window
         _grid.Clear();
         _sticky = false;
 
-        _appWindow.Hide();
-        _backdrop.Hide();
+        if (_visible)
+        {
+            _appWindow.Hide();
+            _backdrop.Hide();
+            _visible = false;
+        }
+
+        RootGrid.Opacity = 1;
+        _backdropShown = false;
     }
 
-    private void ShowBackdrop()
+    private void ShowBackdrop(bool fade)
     {
         var s = SettingsService.Load();
         bool dim = s.PowerSwitcherDimEnabled;
@@ -507,13 +589,17 @@ public sealed partial class SwitcherWindow : Window
         if (!dim && !blur)
         {
             _backdrop.Hide();
+            _backdropShown = false;
             return;
         }
 
         // The darkness slider drives the tint in both modes, so dim and blur stack:
         // blur on -> acrylic blur tinted by the dim amount; blur off -> a flat dim.
         int tint = dim ? Math.Clamp(s.PowerSwitcherDimAmount, 0, 100) * 255 / 100 : 0;
-        _backdrop.Show(blur: blur, alpha: tint);
+        _backdropShown = true;
+        _fadeBlur = blur;
+        _fadeTargetAlpha = tint;
+        _backdrop.Show(blur, fade ? 0 : tint);
     }
 
     private void Cell_PointerReleased(object sender, PointerRoutedEventArgs e)
