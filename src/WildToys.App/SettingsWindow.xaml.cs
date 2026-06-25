@@ -35,6 +35,7 @@ public sealed partial class SettingsWindow : Window
             "PowerSwitcherPage" => typeof(PowerSwitcherPage),
             "LumaEdgesPage" => typeof(LumaEdgesPage),
             "MouseGesturePage" => typeof(MouseGesturePage),
+            "ImIndicatorPage" => typeof(ImIndicatorPage),
             _ => null,
         };
 

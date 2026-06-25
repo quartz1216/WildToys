@@ -39,6 +39,7 @@
                 <NavigationViewItem Content="Power Switcher" Tag="PowerSwitcherPage" />
                 <NavigationViewItem Content="LumaEdges" Tag="LumaEdgesPage" />
                 <NavigationViewItem Content="MouseGesture" Tag="MouseGesturePage" />
+                <NavigationViewItem Content="IM Indicator" Tag="ImIndicatorPage" />
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" />

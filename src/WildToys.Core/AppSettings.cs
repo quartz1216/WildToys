@@ -13,6 +13,10 @@ public class AppSettings
     public bool IsPowerSwitcherEnabled { get; set; } = true;
     public bool IsLumaEdgesEnabled { get; set; } = true;
     public bool IsMouseGestureEnabled { get; set; } = true;
+    public bool IsImIndicatorEnabled { get; set; } = true;
+
+    // IM Indicator: how long (ms) the input-language badge stays on screen.
+    public int ImIndicatorDurationMs { get; set; } = 1500;
 
     // MouseWarp: optionally animate the cursor to the window center (and how long).
     public bool MouseWarpAnimationEnabled { get; set; } = true;

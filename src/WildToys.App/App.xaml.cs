@@ -6,6 +6,7 @@ using H.NotifyIcon;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
+using WildToys.Modules.ImIndicator;
 using WildToys.Modules.LumaEdges;
 using WildToys.Modules.MouseWarp;
 using WildToys.Modules.PowerSwitcher;
@@ -35,6 +36,9 @@ public partial class App : Application
 
     /// <summary>The MouseWarp module (cursor to the activated window's center).</summary>
     public MouseWarpModule MouseWarp { get; } = new();
+
+    /// <summary>The IM Indicator module (input-language badge near the caret).</summary>
+    public ImIndicatorModule ImIndicator { get; } = new();
 
     public App()
     {
@@ -115,6 +119,9 @@ public partial class App : Application
 
         if (Settings.IsMouseWarpEnabled)
             MouseWarp.Start();
+
+        if (Settings.IsImIndicatorEnabled)
+            ImIndicator.Start();
     }
 
     private void ShowSettings()
@@ -133,6 +140,7 @@ public partial class App : Application
         PowerSwitcher.Dispose();
         LumaEdges.Dispose();
         MouseWarp.Dispose();
+        ImIndicator.Dispose();
         _trayIcon?.Dispose();
         _trayIcon = null;
         Exit();
