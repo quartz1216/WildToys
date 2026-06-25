@@ -11,8 +11,7 @@ original WPF app rather than reimplemented.
 ```
 WildToys.slnx
 src/
-  WildToys.Core/   class library (net10.0-windows, WinForms) — modules, hooks, Win32, settings
-  WildToys.App/    WinUI 3 app — windows, settings UI, tray
+  WildToys/    WinUI 3 app — windows, settings UI, tray, modules, hooks, Win32, settings
 ```
 
 ## Modules
@@ -27,5 +26,5 @@ src/
 ## Build
 
 ```
-dotnet build src/WildToys.App/WildToys.App.csproj -c Debug -p:Platform=x64
+dotnet build src/WildToys/WildToys.csproj -c Debug -p:Platform=x64
 ```

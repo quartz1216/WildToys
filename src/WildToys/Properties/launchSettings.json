@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "WildToys.App (Package)": {
+    "WildToys (Package)": {
       "commandName": "MsixPackage"
     },
-    "WildToys.App (Unpackaged)": {
+    "WildToys (Unpackaged)": {
       "commandName": "Project"
     }
   }
