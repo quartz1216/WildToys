@@ -14,6 +14,10 @@ public class AppSettings
     public bool IsLumaEdgesEnabled { get; set; } = true;
     public bool IsMouseGestureEnabled { get; set; } = true;
 
+    // MouseWarp: optionally animate the cursor to the window center (and how long).
+    public bool MouseWarpAnimationEnabled { get; set; } = true;
+    public int MouseWarpAnimationDurationMs { get; set; } = 180;
+
     // LumaEdges: edge-zone hit thickness (px) and per-button zone -> hotkey maps.
     // Zone keys are the HotZone enum names ("Top", "TopLeft", ...). An empty/absent
     // value means the click passes through normally.

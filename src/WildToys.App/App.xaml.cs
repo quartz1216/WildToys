@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using WildToys.Modules.LumaEdges;
+using WildToys.Modules.MouseWarp;
 using WildToys.Modules.PowerSwitcher;
 
 namespace WildToys;
@@ -31,6 +32,9 @@ public partial class App : Application
 
     /// <summary>The LumaEdges module (screen-edge click hotkeys).</summary>
     public LumaEdgesModule LumaEdges { get; } = new();
+
+    /// <summary>The MouseWarp module (cursor to the activated window's center).</summary>
+    public MouseWarpModule MouseWarp { get; } = new();
 
     public App()
     {
@@ -108,6 +112,9 @@ public partial class App : Application
 
         if (Settings.IsLumaEdgesEnabled)
             LumaEdges.Start();
+
+        if (Settings.IsMouseWarpEnabled)
+            MouseWarp.Start();
     }
 
     private void ShowSettings()
@@ -125,6 +132,7 @@ public partial class App : Application
     {
         PowerSwitcher.Dispose();
         LumaEdges.Dispose();
+        MouseWarp.Dispose();
         _trayIcon?.Dispose();
         _trayIcon = null;
         Exit();
