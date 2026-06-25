@@ -32,9 +32,6 @@ public sealed class MouseGestureModule : IDisposable
     private const uint MOUSEEVENTF_MIDDLEDOWN = 0x0020;
     private const uint MOUSEEVENTF_MIDDLEUP = 0x0040;
 
-    // Tag on our re-synthesized clicks so the hook lets them through.
-    private static readonly nuint MagicExtraInfo = 0x57544759; // "WTGY"
-
     private const int SegmentThreshold = 30; // px before a stroke direction is committed
 
     private const string Right = "Right";
@@ -99,7 +96,7 @@ public sealed class MouseGestureModule : IDisposable
             var info = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
 
             // Ignore the clicks we re-synthesize ourselves.
-            if (info.dwExtraInfo != MagicExtraInfo)
+            if (info.dwExtraInfo != InjectedInput.SelfTag)
             {
                 switch ((int)wParam)
                 {
@@ -239,8 +236,8 @@ public sealed class MouseGestureModule : IDisposable
         var (down, up) = button == Right
             ? (MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP)
             : (MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP);
-        mouse_event(down, 0, 0, 0, MagicExtraInfo);
-        mouse_event(up, 0, 0, 0, MagicExtraInfo);
+        mouse_event(down, 0, 0, 0, InjectedInput.SelfTag);
+        mouse_event(up, 0, 0, 0, InjectedInput.SelfTag);
     }
 
     public void Dispose() => Stop();

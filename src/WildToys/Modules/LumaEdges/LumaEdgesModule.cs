@@ -113,9 +113,20 @@ public sealed class LumaEdgesModule : IDisposable
 
     private nint MouseHookCallback(int nCode, nint wParam, nint lParam)
     {
+        try
+        {
         if (nCode >= 0)
         {
             var msg = (int)wParam;
+
+            // Ignore mouse input the app re-synthesized itself (e.g. MouseGesture
+            // replaying a plain click). Without this an edge re-emit would re-trigger
+            // us and swallow the app's own click.
+            if (msg is WM_LBUTTONDOWN or WM_LBUTTONUP or WM_RBUTTONDOWN or WM_RBUTTONUP or WM_MBUTTONDOWN or WM_MBUTTONUP
+                && Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam).dwExtraInfo == InjectedInput.SelfTag)
+            {
+                return CallNextHookEx(_mouseHookId, nCode, wParam, lParam);
+            }
 
             // Swallow the button-UP that pairs with a blocked DOWN so the target app
             // never sees a half-click.
@@ -152,17 +163,30 @@ public sealed class LumaEdgesModule : IDisposable
                     else if (msg == WM_MBUTTONDOWN)
                         hotkey = _settings.LumaEdgesMiddleZones.GetValueOrDefault(detectedZone.ToString());
 
-                    if (!string.IsNullOrWhiteSpace(hotkey) && TryStartCooldown())
+                    if (!string.IsNullOrWhiteSpace(hotkey))
                     {
+                        // Always swallow a click that lands in a mapped zone (and remember
+                        // the button so its paired UP is swallowed too) so it never leaks to
+                        // the app behind the edge. The cooldown only debounces the hotkey
+                        // itself — without this, a click during the cooldown window would
+                        // pass straight through (the click-through bug).
                         if (msg == WM_LBUTTONDOWN) _lButtonBlocked = true;
                         else if (msg == WM_RBUTTONDOWN) _rButtonBlocked = true;
                         else if (msg == WM_MBUTTONDOWN) _mButtonBlocked = true;
 
-                        SendHotkeyAsync(hotkey);
+                        if (TryStartCooldown())
+                            SendHotkeyAsync(hotkey);
+
                         return 1; // Block click
                     }
                 }
             }
+        }
+
+        }
+        catch (Exception ex)
+        {
+            CrashLog.Write("LumaEdges.MouseHookCallback", ex);
         }
 
         return CallNextHookEx(_mouseHookId, nCode, wParam, lParam);
@@ -232,8 +256,15 @@ public sealed class LumaEdgesModule : IDisposable
     {
         System.Threading.Tasks.Task.Run(async () =>
         {
-            await System.Threading.Tasks.Task.Delay(10);
-            HotkeySender.SendDetailed(hotkey);
+            try
+            {
+                await System.Threading.Tasks.Task.Delay(10);
+                HotkeySender.SendDetailed(hotkey);
+            }
+            catch (Exception ex)
+            {
+                CrashLog.Write("LumaEdges.SendHotkeyAsync", ex);
+            }
         });
     }
 
@@ -281,6 +312,16 @@ public sealed class LumaEdgesModule : IDisposable
     {
         public int x;
         public int y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MSLLHOOKSTRUCT
+    {
+        public POINT pt;
+        public uint mouseData;
+        public uint flags;
+        public uint time;
+        public nuint dwExtraInfo;
     }
 
     [StructLayout(LayoutKind.Sequential)]

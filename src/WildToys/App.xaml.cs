@@ -22,6 +22,7 @@ public partial class App : Application
 {
     private TaskbarIcon? _trayIcon;
     private SettingsWindow? _settingsWindow;
+    private static System.Threading.Mutex? _singleInstanceMutex;
 
     /// <summary>Strongly-typed accessor for the running application instance.</summary>
     public static new App Current => (App)Application.Current;
@@ -47,6 +48,11 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+
+        // Capture the real exception behind any crash to %AppData%\WildToys\crash.log.
+        UnhandledException += (_, e) => CrashLog.Write($"App.UnhandledException (Handled={e.Handled})", e.Exception);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) => CrashLog.Write("AppDomain.UnhandledException", e.ExceptionObject as Exception);
+        System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (_, e) => CrashLog.Write("TaskScheduler.UnobservedTaskException", e.Exception);
     }
 
     /// <summary>Persists the current settings to disk.</summary>
@@ -91,6 +97,16 @@ public partial class App : Application
             return;
         }
 
+        // Allow only one instance. A second copy would install its own global mouse
+        // hooks that fight the first's over the same clicks (re-emitted clicks bouncing
+        // between the two hooks), which can wedge the UI thread and crash. Acquired
+        // after the elevation relaunch so the surviving (elevated) instance holds it.
+        if (!TryAcquireSingleInstance())
+        {
+            Exit();
+            return;
+        }
+
         _trayIcon = new TaskbarIcon
         {
             ToolTipText = "WildToys",
@@ -118,9 +134,6 @@ public partial class App : Application
         if (Settings.IsPowerSwitcherEnabled)
             PowerSwitcher.Start();
 
-        if (Settings.IsLumaEdgesEnabled)
-            LumaEdges.Start();
-
         if (Settings.IsMouseWarpEnabled)
             MouseWarp.Start();
 
@@ -129,6 +142,27 @@ public partial class App : Application
 
         if (Settings.IsMouseGestureEnabled)
             MouseGesture.Start();
+
+        // Start LumaEdges last so its low-level mouse hook is installed last and is
+        // therefore called first — giving edge clicks priority over MouseGesture when
+        // both are bound to the same button.
+        if (Settings.IsLumaEdgesEnabled)
+            LumaEdges.Start();
+    }
+
+    private static bool TryAcquireSingleInstance()
+    {
+        try
+        {
+            _singleInstanceMutex = new System.Threading.Mutex(initiallyOwned: true, @"Local\WildToys.SingleInstance", out bool createdNew);
+            return createdNew;
+        }
+        catch
+        {
+            // The named mutex exists but we couldn't take it (e.g. created by an
+            // instance running at a different integrity level) — treat as "already running".
+            return false;
+        }
     }
 
     private void ShowSettings()
