@@ -19,6 +19,9 @@ public sealed partial class SettingsWindow : Window
         AppWindow.SetIcon(iconPath);
         AppTitleBar.IconSource = new ImageIconSource { ImageSource = new BitmapImage(new Uri(iconPath)) };
 
+        // Default window size (physical pixels).
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(1144, 717));
+
         ContentFrame.Navigate(typeof(GeneralPage));
         NavView.SelectedItem = NavGeneral;
     }
