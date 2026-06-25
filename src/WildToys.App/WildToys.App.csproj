@@ -13,7 +13,15 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Run unpackaged (plain exe): required for self-elevation to admin. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <EnableWinAppRunSupport>false</EnableWinAppRunSupport>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Deploy the app icon next to the exe for the unpackaged tray/window. -->
+    <Content Update="Assets\AppIcon.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />

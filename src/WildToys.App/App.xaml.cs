@@ -1,4 +1,7 @@
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Security.Principal;
 using H.NotifyIcon;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -33,14 +36,49 @@ public partial class App : Application
     /// <summary>Persists the current settings to disk.</summary>
     public void SaveSettings() => SettingsService.Save(Settings);
 
+    /// <summary>Absolute path to a file deployed under the app's Assets folder.</summary>
+    public static string AssetPath(string fileName) =>
+        Path.Combine(AppContext.BaseDirectory, "Assets", fileName);
+
+    public static bool IsElevated()
+    {
+        using var identity = WindowsIdentity.GetCurrent();
+        return new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator);
+    }
+
+    private static bool RestartAsAdmin()
+    {
+        var exePath = Process.GetCurrentProcess().MainModule?.FileName;
+        if (string.IsNullOrEmpty(exePath))
+            return false;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo { FileName = exePath, UseShellExecute = true, Verb = "runas" });
+            return true;
+        }
+        catch
+        {
+            return false; // user dismissed the UAC prompt
+        }
+    }
+
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         Settings = SettingsService.Load();
 
+        // Relaunch elevated if requested (needed to interact with elevated
+        // windows like Task Manager). Only possible because the app is unpackaged.
+        if (Settings.StartAsAdmin && !IsElevated() && RestartAsAdmin())
+        {
+            Exit();
+            return;
+        }
+
         _trayIcon = new TaskbarIcon
         {
             ToolTipText = "WildToys",
-            IconSource = new BitmapImage(new Uri("ms-appx:///Assets/AppIcon.ico")),
+            IconSource = new BitmapImage(new Uri(AssetPath("AppIcon.ico"))),
             NoLeftClickDelay = true,
             ContextMenuMode = ContextMenuMode.SecondWindow,
             LeftClickCommand = new RelayCommand(ShowSettings),

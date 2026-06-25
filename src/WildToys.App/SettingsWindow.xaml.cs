@@ -1,6 +1,7 @@
 using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using WildToys.Pages;
 
 namespace WildToys;
@@ -13,7 +14,10 @@ public sealed partial class SettingsWindow : Window
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
-        AppWindow.SetIcon("Assets/AppIcon.ico");
+
+        var iconPath = App.AssetPath("AppIcon.ico");
+        AppWindow.SetIcon(iconPath);
+        AppTitleBar.IconSource = new ImageIconSource { ImageSource = new BitmapImage(new Uri(iconPath)) };
 
         ContentFrame.Navigate(typeof(GeneralPage));
         NavView.SelectedItem = NavGeneral;
